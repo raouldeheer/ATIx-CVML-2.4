@@ -27,5 +27,4 @@ void main() {
 	imshow("Image Crop", crop_img);
 
 	waitKey(0);
-
 }
