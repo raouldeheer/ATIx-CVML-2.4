@@ -1,9 +1,10 @@
-#include <opencv2/imgcodecs.hpp>
-#include <opencv2/highgui.hpp>
-#include <opencv2/imgproc.hpp>
-
 #include <iostream>
+#include "preProcessorText.h"
 
 int main(void) {
-	std::cout << "Hello text";
+	preProcessorText pre = preProcessorText();
+	cv::Mat image = cv::imread("text.png");
+	pre.collectA4(pre.convertImage(image));
+	
+
 }
