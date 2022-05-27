@@ -145,10 +145,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="blobDetection.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="preProcessorText.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="blobDetection.h" />
     <ClInclude Include="preProcessorText.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
