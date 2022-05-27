@@ -4,13 +4,13 @@
 #include <opencv2/imgproc.hpp>
 #include <array>
 #include <vector>
+#include <iostream>
 
 cv::Mat preProcessorText::convertImage(cv::Mat image)
 {
 	// Preprocessoing edges.
-	cv::Mat imgResize, imgGray, imgBlur, imgCanny, imgDilation;
-	cv::resize(image, imgResize, cv::Size(), 0.3, 0.3);
-	cv::cvtColor(imgResize, imgGray,  cv::COLOR_BGR2GRAY);
+	cv::Mat imgGray, imgBlur, imgCanny, imgDilation;
+	cv::cvtColor(image, imgGray,  cv::COLOR_BGR2GRAY);
 	cv::GaussianBlur( imgGray, imgBlur, cv::Size(3, 3), 3, 0);
 	cv::Canny(imgBlur, imgCanny,  25, 75);
 	cv::Mat kernel = cv::getStructuringElement(cv::MORPH_RECT, cv::Size(3, 3));
@@ -22,7 +22,7 @@ cv::Mat preProcessorText::convertImage(cv::Mat image)
 	return imgDilation;
 }
 
-std::array<cv::Point, 4> preProcessorText::collectA4(cv::Mat image)
+std::vector<cv::Point> preProcessorText::collectA4(cv::Mat image)
 {
 	// Collecting contours of the image
 	std::vector<std::vector<cv::Point>> contours;
@@ -32,31 +32,71 @@ std::array<cv::Point, 4> preProcessorText::collectA4(cv::Mat image)
 	// Variables of the biggest.
 	int maxArea = 0;
 	std::vector<cv::Point> biggest;
+	std::vector<std::vector<cv::Point>> conPoly(contours.size());
+
 
 	// Finding the A4 countours
 	for (int i = 0; i < contours.size(); i++) {
-		int area = cv::contourArea(contours.at(i));
+		int area = cv::contourArea(contours[i]);
+		float peri = cv::arcLength(contours[i], true);
+		cv::approxPolyDP(contours[i], conPoly[i], (0.02 * peri) , true);
 
 		if (area > maxArea){
 			maxArea = area;
-			cv::approxPolyDP(contours[i], biggest, 0.02f * cv::arcLength(contours[i], true), true);
+			biggest = conPoly[i];
 		}
 	}
 
 	// Checking if valid an porting to array;
 	if (biggest.size() == 4) {
-		std::array<cv::Point, 4> result;
-		std::copy_n(std::make_move_iterator(biggest.begin()), 4, result.begin());
-		return result;
+		cv::drawContours(image, conPoly, -1, cv::Scalar(255, 0, 0), 10);
+		cv::imshow("Contours", image);
+		cv::waitKey();
 	}
 
-	return std::array<cv::Point, 4>();
+	return biggest;
 }
 
-cv::Mat preProcessorText::wrapA4(cv::Mat image, std::array<cv::Point, 4> points)
+cv::Mat preProcessorText::wrapA4(cv::Mat image, std::vector<cv::Point> points, cv::Point demensions)
 {
-	//matrix = getPerspectiveTransform(src, dst);
-	//warpPerspective(img, imgWarp, matrix, Point(w, h));
+	// Drawing the edges
+	for (int i = 0; i < 4; i++)
+	{
+		cv::circle(image, points[i], 10, cv::Scalar(0, 0, 255), cv::FILLED);
+	}
 
-	return cv::Mat();
+	cv::imshow("Edges", image);
+	cv::waitKey();
+
+	//Sorting the input vector to array
+	cv::Point2f src[4];
+	src[0] = points[0];
+	for (int i = 0; i < 4; i++) {
+		if (points[i].x + points[i].y < src[0].x + src[0].y) {
+			src[0] = points[i];
+		}
+		else if (points[i].x - points[i].y > src[1].x - src[1].y) {
+			src[1] = points[i];
+		}
+		else if (points[i].x - points[i].y < src[2].x - src[2].y) {
+			src[2] = points[i];
+		}
+		else if (points[i].x + points[i].y > src[3].x + src[3].y) {
+			src[3] = points[i];
+		}
+	}
+
+	cv::Point2f dst[4] = { {0.0f,0.0f},{(float)demensions.x,0.0f},{0.0f,(float)demensions.y},{(float)demensions.x,(float)demensions.y} };
+
+	// Wrapping the image
+	cv::Mat imgWarp;
+
+	cv:: Mat matrix =  cv::getPerspectiveTransform(src, dst);
+	warpPerspective(image, imgWarp, matrix, demensions);
+
+	cv::imshow("Wrap", imgWarp);
+	cv::waitKey();
+
+
+	return imgWarp;
 }

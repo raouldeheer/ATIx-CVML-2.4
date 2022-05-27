@@ -9,6 +9,6 @@ class preProcessorText {
 public :
 	// Preprocessing steps available
 	cv::Mat convertImage(cv::Mat image);
-	std::array<cv::Point, 4> collectA4(cv::Mat image);
-	cv::Mat wrapA4(cv::Mat image, std::array<cv::Point, 4> points);
+	std::vector<cv::Point> collectA4(cv::Mat image);
+	cv::Mat wrapA4(cv::Mat image, std::vector<cv::Point> points, cv::Point demensions);
 };
