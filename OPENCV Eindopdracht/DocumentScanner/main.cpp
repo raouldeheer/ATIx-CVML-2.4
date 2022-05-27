@@ -8,12 +8,12 @@ int main(void) {
 	cv::Mat paperImg = pre.wrapA4(image, pre.collectA4(pre.convertImage(image)), cv::Point(image.size().width,image.size().height));
 	
 	cv::Mat cropped_image = crop(paperImg);
-	std::vector<cv::KeyPoint> keypoints = blobDetect(cropped_image);
 
-	cv::Mat image_with_keypoints;
-	cv::drawKeypoints(cropped_image, keypoints, image_with_keypoints, cv::Scalar(0, 0, 255), cv::DrawMatchesFlags::DRAW_RICH_KEYPOINTS);
-	cv::imshow("points", image_with_keypoints);
+	std::vector<cv::KeyPoint> keypoints = blobDetect(cropped_image, cv::Size(3, 3));
+	std::vector<cv::KeyPoint> keypoints2 = blobDetect(cropped_image, cv::Size(4, 4));
+
 	std::cout << "letters: " << keypoints.size() << std::endl;
+	std::cout << "woorden: " << keypoints2.size() << std::endl;
 
 	cv::waitKey();
 }

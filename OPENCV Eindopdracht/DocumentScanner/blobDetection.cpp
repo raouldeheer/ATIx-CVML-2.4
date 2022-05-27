@@ -10,11 +10,13 @@ cv::Mat crop(cv::Mat input)
 	return cropped_image;
 }
 
-std::vector<cv::KeyPoint> blobDetect(cv::Mat input)
+std::vector<cv::KeyPoint> blobDetect(cv::Mat input, cv::Size dilKernel)
 {
-	cv::Mat imgGray, imgThes;
+	cv::Mat imgGray, imgThes, imgDil;
 	cv::cvtColor(input, imgGray, cv::COLOR_BGR2GRAY);
 	cv::threshold(imgGray, imgThes, 100, 255, cv::THRESH_BINARY);
+	cv::Mat kernel = cv::getStructuringElement(cv::MORPH_RECT, dilKernel);
+	cv::dilate(imgThes, imgDil, kernel);
 
 	cv::SimpleBlobDetector::Params params;
 
@@ -41,7 +43,7 @@ std::vector<cv::KeyPoint> blobDetect(cv::Mat input)
 	cv::Ptr<cv::SimpleBlobDetector> detector = cv::SimpleBlobDetector::create(params);
 
 	std::vector<cv::KeyPoint> keypoints;
-	detector->detect(imgThes, keypoints);
+	detector->detect(imgDil, keypoints);
 
 	return keypoints;
 }

@@ -7,4 +7,4 @@
 #include <array>
 
 cv::Mat crop(cv::Mat input);
-std::vector<cv::KeyPoint> blobDetect(cv::Mat input);
+std::vector<cv::KeyPoint> blobDetect(cv::Mat input, cv::Size dilKernel);
